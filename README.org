@@ -1,0 +1,34 @@
+:PROPERTIES:
+:ID:       0d98d9d9-02e0-4096-9015-a710fc068843
+:END:
+#+title: Guix
+#+author: Javier Pacheco
+#+description: How to install GNU/Guix without the libre software thing.
+#+tags: :guix:linux:
+#+date: [2024-12-24 Tue 13:24]
+
+
+* Download and burn the iso.
+I use the sstemcrafters [[https://github.com/SystemCrafters/guix-installer][ISO.]]
+
+#+begin_src shell
+sudo dd status=progress if=guix-installer-202106150234.iso of=/dev/sdb && sync
+#+end_src
+
+* Install the OS.
+Now with the Guix iso. Boot your laptop in it, and follow the instructions to install the OS, just ignore the warnings aboiut the libre software, And stop in the part that you actuall going to start the installation, and open another TTY:
+
+#+begin_src shell
+Ctrl + Alt + f2  
+#+end_src
+** Initialize the guix daemon.
+We need to start the daemon to start the process and point it to the mount partition to start the installation there.
+
+#+begin_src shell
+herd start cow-store /mnt
+#+end_src
+** Copy the channels.scm file from the ISO to our new system.
+
+#+begin_src shell
+cp /etc/channels.scm /mnt/etc && chmod +w /mnt/etc/channels.scm
+#+end_src
