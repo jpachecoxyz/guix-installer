@@ -1,0 +1,14 @@
+--- config.scm	2024-12-24 14:32:56.626518930 -0600
++++ config_1.scm	2024-12-24 14:32:49.441658843 -0600
+@@ -1,8 +1,10 @@
+-(use-modules (gnu))
++(use-modules (gnu) (nongnu packages linux))
+ (use-service-modules networking ssh)
+ (use-package-modules screen ssh)
+ 
+ (operating-system
++  (kernel linux)
++  (firmware (list linux-firmware))
+   (host-name "komputilo")
+   (timezone "Europe/Berlin")
+   (locale "en_US.utf8")

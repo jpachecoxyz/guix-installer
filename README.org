@@ -7,16 +7,18 @@
 #+tags: :guix:linux:
 #+date: [2024-12-24 Tue 13:24]
 
+* About.
+The script =install.sh= will do a couple of actions to try to make the GNU/guix installation more friendly, so, basically this =README.org= file will tangle the script, the power of emacs of course. So, while I was working in this "note" file, then I realized that I can use emacs and make a script.
 
 * Download and burn the iso.
-I use the sstemcrafters [[https://github.com/SystemCrafters/guix-installer][ISO.]]
+I use the systemcrafter [[https://github.com/SystemCrafters/guix-installer][ISO.]]
 
 #+begin_src shell
 sudo dd status=progress if=guix-installer-202106150234.iso of=/dev/sdb && sync
 #+end_src
 
 * Install the OS.
-Now with the Guix iso. Boot your laptop in it, and follow the instructions to install the OS, just ignore the warnings aboiut the libre software, And stop in the part that you actuall going to start the installation, and open another TTY:
+Now with the Guix iso. Boot your laptop in it, and follow the instructions to install the OS, just ignore the warnings about the libre software, And stop in the part that you actually going to start the installation, and open another TTY:
 
 #+begin_src shell
 Ctrl + Alt + f2  
@@ -24,11 +26,18 @@ Ctrl + Alt + f2
 ** Initialize the guix daemon.
 We need to start the daemon to start the process and point it to the mount partition to start the installation there.
 
-#+begin_src shell
+#+begin_src shell :tangle ./install.sh :shebang "#!/bin/sh"
 herd start cow-store /mnt
 #+end_src
 ** Copy the channels.scm file from the ISO to our new system.
 
-#+begin_src shell
+#+begin_src shell :tangle ./install.sh
 cp /etc/channels.scm /mnt/etc && chmod +w /mnt/etc/channels.scm
+#+end_src
+
+** Modify the config.scm file using patch
+
+#+begin_src shell :tangle ./install.sh
+cp /mnt/etc/config.scm .
+patch config.scm < config.patch && cp config.scm /mnt/etc/config.scm
 #+end_src
