@@ -17,41 +17,12 @@ I use the systemcrafter [[https://github.com/SystemCrafters/guix-installer][ISO.
 sudo dd status=progress if=guix-installer-202106150234.iso of=/dev/sdb && sync
 #+end_src
 
-* Install the OS by hand.
+* Install the OS.
 Now with the Guix iso. Boot your laptop in it, and follow the instructions to install the OS, just ignore the warnings about the libre software, And stop in the part that you actually going to start the installation, and open another TTY:
 
 #+begin_src shell
 Ctrl + Alt + f2  
 #+end_src
-** Initialize the guix daemon.
-We need to start the daemon to start the process and point it to the mount partition to start the installation there.
-
-#+begin_src shell
-herd start cow-store /mnt
-#+end_src
-** Copy the channels.scm file from the ISO to our new system.
-
-#+begin_src shell
-cp /etc/channels.scm /mnt/etc && chmod +w /mnt/etc/channels.scm
-#+end_src
-
-** Modify the config.scm file using patch
-
-#+begin_src shell
-cp /mnt/etc/config.scm .
-
-sed -i '/(use-modules (gnu))/s/$/ (nongnu packages linux)/' config.scm
-sed -i '/(operating-system/a\
-  (kernel linux)\
-  (firmware (list linux-firmware))' config.scm
-#+end_src
-
-** The final command:
-
-#+begin_src shell
-guix time-machine -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt
-#+end_src
-
 
 * The script itself "Automated":
 
