@@ -17,7 +17,7 @@ I use the systemcrafter [[https://github.com/SystemCrafters/guix-installer][ISO.
 sudo dd status=progress if=guix-installer-202106150234.iso of=/dev/sdb && sync
 #+end_src
 
-* Install the OS.
+* Install the OS by hand.
 Now with the Guix iso. Boot your laptop in it, and follow the instructions to install the OS, just ignore the warnings about the libre software, And stop in the part that you actually going to start the installation, and open another TTY:
 
 #+begin_src shell
@@ -26,24 +26,49 @@ Ctrl + Alt + f2
 ** Initialize the guix daemon.
 We need to start the daemon to start the process and point it to the mount partition to start the installation there.
 
-#+begin_src shell :tangle ./install.sh :shebang "#!/bin/sh"
+#+begin_src shell
 herd start cow-store /mnt
 #+end_src
 ** Copy the channels.scm file from the ISO to our new system.
 
-#+begin_src shell :tangle ./install.sh
+#+begin_src shell
 cp /etc/channels.scm /mnt/etc && chmod +w /mnt/etc/channels.scm
 #+end_src
 
 ** Modify the config.scm file using patch
 
-#+begin_src shell :tangle ./install.sh
+#+begin_src shell
 cp /mnt/etc/config.scm .
 patch config.scm < config.patch && cp config.scm /mnt/etc/config.scm
 #+end_src
 
 ** The final command:
 
-#+begin_src shell :tangle ./install.sh
+#+begin_src shell
 guix time-machine -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt
+#+end_src
+
+
+* The script itself "Automated":
+
+#+begin_src shell :tangle ./install.sh :shebang "#!/bin/sh"
+set -e
+set -o pipefail
+
+log_error() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - ERROR: $1" >&2
+  exit 1
+}
+
+log() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+log "Starting cow-store service..." && herd start cow-store /mnt || log_error "Failed to start cow-store."
+log "Copying channels.scm..." && cp /etc/channels.scm /mnt/etc && chmod +w /mnt/etc/channels.scm || log_error "Failed to copy or modify channels.scm."
+log "Patching config.scm..." && cp /mnt/etc/config.scm . && patch config.scm < config.patch && cp config.scm /mnt/etc/config.scm || log_error "Failed to patch config.scm."
+log "Initializing system with guix time-machine..." && guix time-machine -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt || log_error "System initialization failed."
+
+log "Script completed successfully."
+
 #+end_src
